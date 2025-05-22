@@ -44,7 +44,7 @@ def draw_control_overlay(img, lh_data=None, rh_data=None):
 
     if lh_data:
         # Normalize and compute actual pixel position of left hand
-        xy_ctl_x_pct_normalized = min((lh_data.center_perc[0] - 0.25) * 2, 1.0)
+        xy_ctl_x_pct_normalized = min((lh_data.center_perc[0] - 0.25) * 4, 1.0)
         xy_ctl_y_pct_normalized = min((lh_data.center_perc[1] - 0.5) * 2, 1.0)
 
         xy_ctl_x = int(xy_ctl_x_pct_normalized *
