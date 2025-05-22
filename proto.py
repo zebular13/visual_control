@@ -38,44 +38,57 @@ def lerp(a, b, t):
 
 
 def draw_control_overlay(img, lh_data=None, rh_data=None):
+    # Draw control circle for XY control (left hand)
     cv2.circle(img, CONTROL_CIRCLE_XY_CENTER,
                CONTROL_CIRCLE_DEADZONE_R, CV_DRAW_COLOR_PRIMARY, 2)
 
-    # TODO: bounds validation for both hands (ignore hands outside of certain ranges)
     if lh_data:
-        # must normalize. if a hand has center of (0.5, 0.5) it means the hand is in the middle of the screen, but our xy control center is
-        # at (0.25, 0.5) so we need to scale the x value by 2
+        # Normalize and compute actual pixel position of left hand
         xy_ctl_x_pct_normalized = min((lh_data.center_perc[0] - 0.25) * 2, 1.0)
-        xy_ctl_x = int(
-            xy_ctl_x_pct_normalized * CONTROL_CIRCLE_DEADZONE_R) + CONTROL_CIRCLE_XY_CENTER[0]
-
         xy_ctl_y_pct_normalized = min((lh_data.center_perc[1] - 0.5) * 2, 1.0)
-        xy_ctl_y = int(
-            xy_ctl_y_pct_normalized
-            * CONTROL_CIRCLE_DEADZONE_R) + CONTROL_CIRCLE_XY_CENTER[1]
-        cv2.circle(img, (xy_ctl_x, xy_ctl_y),
-                   4, CV_DRAW_COLOR_PRIMARY, cv2.FILLED)
 
+        xy_ctl_x = int(xy_ctl_x_pct_normalized *
+                       CONTROL_CIRCLE_DEADZONE_R) + CONTROL_CIRCLE_XY_CENTER[0]
+        xy_ctl_y = int(xy_ctl_y_pct_normalized *
+                       CONTROL_CIRCLE_DEADZONE_R) + CONTROL_CIRCLE_XY_CENTER[1]
+
+        hand_xy_point = (xy_ctl_x, xy_ctl_y)
+        center_xy_point = CONTROL_CIRCLE_XY_CENTER
+
+        # Draw line from center to hand position
+        cv2.line(img, center_xy_point, hand_xy_point,
+                 CV_DRAW_COLOR_PRIMARY, 1)
+
+        # Draw hand position dot
+        cv2.circle(img, hand_xy_point, 4, CV_DRAW_COLOR_PRIMARY, cv2.FILLED)
+
+    # Draw control circle for Z-aperture (right hand)
     cv2.circle(img, CONTROL_CIRCLE_Z_APERATURE_CENTER,
                CONTROL_CIRCLE_DEADZONE_R, CV_DRAW_COLOR_PRIMARY, 2)
+
     if rh_data:
-        z_ctl_pct_normalized = min(
-            (rh_data.center_perc[1] - 0.50) * 2, 1.0)
-        # y being the height in the image
-        z_ctl_y = int(
-            z_ctl_pct_normalized * CONTROL_CIRCLE_DEADZONE_R) + CONTROL_CIRCLE_Z_APERATURE_CENTER[1]
-
+        z_ctl_pct_normalized = min((rh_data.center_perc[1] - 0.50) * 2, 1.0)
         aperature_ctl_x_pct_normalized = min(
-            (rh_data.center_perc[0] - 0.75) * 2, 1.0)
-        # x being the width in the image
-        aperature_ctl_x = int(
-            aperature_ctl_x_pct_normalized * CONTROL_CIRCLE_DEADZONE_R) + CONTROL_CIRCLE_Z_APERATURE_CENTER[0]
-        print(f"apx, py: {aperature_ctl_x}, {z_ctl_y}")
-        cv2.circle(img, (aperature_ctl_x, z_ctl_y),
-                   4, CV_DRAW_COLOR_PRIMARY, cv2.FILLED)
+            (rh_data.center_perc[0] - 0.75) * 4, 1.0)
 
-    cv2.line(img, (int(CAMERA_WIDTH/2), 0),
-             (int(CAMERA_WIDTH/2), CAMERA_HEIGHT), CV_DRAW_COLOR_PRIMARY, 1)
+        aperature_ctl_x = int(aperature_ctl_x_pct_normalized *
+                              CONTROL_CIRCLE_DEADZONE_R) + CONTROL_CIRCLE_Z_APERATURE_CENTER[0]
+        z_ctl_y = int(z_ctl_pct_normalized *
+                      CONTROL_CIRCLE_DEADZONE_R) + CONTROL_CIRCLE_Z_APERATURE_CENTER[1]
+
+        hand_z_point = (aperature_ctl_x, z_ctl_y)
+        center_z_point = CONTROL_CIRCLE_Z_APERATURE_CENTER
+
+        # Draw line from center to hand Z-position
+        cv2.line(img, center_z_point, hand_z_point,
+                 CV_DRAW_COLOR_PRIMARY, 1)
+
+        # Draw hand position dot
+        cv2.circle(img, hand_z_point, 4, CV_DRAW_COLOR_PRIMARY, cv2.FILLED)
+
+    # Optional: draw vertical center reference line
+    cv2.line(img, (int(CAMERA_WIDTH / 2), 0),
+             (int(CAMERA_WIDTH / 2), CAMERA_HEIGHT), CV_DRAW_COLOR_PRIMARY, 1)
 
 
 def main():
